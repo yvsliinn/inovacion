@@ -9,7 +9,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 
 <style>
-
 *{
 margin:0;
 padding:0;
@@ -24,7 +23,6 @@ min-height:100vh;
 }
 
 /* LOGIN */
-
 #login{
 position:fixed;
 inset:0;
@@ -75,7 +73,6 @@ background:#1d4ed8;
 }
 
 /* SIDEBAR */
-
 .sidebar{
 width:240px;
 background:#0f172a;
@@ -107,15 +104,18 @@ background:#1e293b;
 color:white;
 cursor:pointer;
 font-size:15px;
+text-align: left;
+display: flex;
+align-items: center;
+gap: 10px;
 transition:0.2s;
 }
 
-.menu button:hover{
+.menu button:hover, .menu button.active{
 background:#334155;
 }
 
 /* MAIN */
-
 .main{
 margin-left:240px;
 flex:1;
@@ -172,7 +172,6 @@ color:#0f172a;
 }
 
 /* AREA */
-
 .area{
 margin-bottom:40px;
 }
@@ -188,7 +187,6 @@ gap:10px;
 }
 
 /* GRID */
-
 .grid{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
@@ -196,7 +194,6 @@ gap:18px;
 }
 
 /* CARD */
-
 .cama{
 background:white;
 padding:18px;
@@ -255,6 +252,13 @@ border:1px solid #cbd5e1;
 margin-bottom:10px;
 }
 
+.cama input:disabled,
+.cama select:disabled {
+background: #f1f5f9;
+color: #64748b;
+cursor: not-allowed;
+}
+
 .btns{
 display:flex;
 gap:10px;
@@ -280,338 +284,281 @@ background:#dc2626;
 color:white;
 }
 
+/* TABLAS VISTAS ADICIONALES */
+.vista-tabla {
+width: 100%;
+border-collapse: collapse;
+background: white;
+border-radius: 12px;
+overflow: hidden;
+box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.vista-tabla th, .vista-tabla td {
+padding: 14px;
+text-align: left;
+border-bottom: 1px solid #e2e8f0;
+}
+
+.vista-tabla th {
+background: #1e293b;
+color: white;
+}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-
 <div id="login">
-
 <div class="login-box">
-
 <h2>Hospital Regional de Talca</h2>
-
 <input type="text" id="user" placeholder="Usuario">
-
 <input type="password" id="pass" placeholder="Contraseña">
-
-<button onclick="login()">
-Ingresar
-</button>
-
+<button onclick="login()">Ingresar</button>
 </div>
-
 </div>
-
-<!-- SIDEBAR -->
 
 <div class="sidebar">
-
 <div class="logo">
 <i class="ti ti-building-hospital"></i>
 Hospital Talca
 </div>
-
 <div class="menu">
-
-<button>Dashboard</button>
-<button>Pacientes</button>
-<button>Camas</button>
-<button>Urgencias</button>
-<button>Doctores</button>
-
+<button onclick="cambiarVista('camas')"><i class="ti ti-bed"></i> Camas</button>
+<button onclick="cambiarVista('pacientes')"><i class="ti ti-user"></i> Pacientes</button>
+<button onclick="cambiarVista('urgencias')"><i class="ti ti-alert-triangle"></i> Urgencias</button>
+<button onclick="cambiarVista('doctores')"><i class="ti ti-stethoscope"></i> Doctores</button>
 </div>
-
 </div>
-
-<!-- MAIN -->
 
 <div class="main">
-
 <div class="top">
-
-<h1>Gestión de Camas</h1>
-
+<h1 id="titulo-pagina">Gestión de Camas</h1>
 <div class="actions">
-
-<button class="add" onclick="agregarCama()">
-Agregar Cama
-</button>
-
-<button class="logout" onclick="cerrarSesion()">
-Salir
-</button>
-
+<button class="add" id="btn-agregar-cama" onclick="agregarCama()">Agregar Cama</button>
+<button class="logout" onclick="cerrarSesion()">Salir</button>
 </div>
-
 </div>
 
 <div class="info">
-
 <h3>Credenciales</h3>
-
 <p><b>Administrador:</b> admin / admin123</p>
 <p><b>Doctor:</b> doctor / doctor123</p>
 <p><b>Enfermera:</b> enfermera / enfer123</p>
-
 </div>
 
 <div id="contenedor"></div>
-
 </div>
 
 <script>
+// Variable global para controlar qué rol está conectado
+let usuarioRol = ""; 
 
-const areas = [
-"Obstetricia",
-"Pediatría",
-"UTI",
-"Medicina",
-"Cirugía"
-];
+const areas = ["Obstetricia", "Pediatría", "UTI", "Medicina", "Cirugía"];
 
 let camas = [
-
-{
-numero:"OBS-01",
-estado:"ocupada",
-paciente:"Camila Rojas",
-doctor:"Dra. Herrera",
-area:"Obstetricia"
-},
-
-{
-numero:"OBS-02",
-estado:"libre",
-paciente:"",
-doctor:"",
-area:"Obstetricia"
-},
-
-{
-numero:"PED-01",
-estado:"ocupada",
-paciente:"Tomás Silva",
-doctor:"Dr. Morales",
-area:"Pediatría"
-},
-
-{
-numero:"PED-02",
-estado:"reservada",
-paciente:"Martina Díaz",
-doctor:"Dra. Soto",
-area:"Pediatría"
-},
-
-{
-numero:"UTI-01",
-estado:"ocupada",
-paciente:"Luis Vega",
-doctor:"Dr. Campos",
-area:"UTI"
-},
-
-{
-numero:"MED-01",
-estado:"ocupada",
-paciente:"Andrea Torres",
-doctor:"Dra. Riquelme",
-area:"Medicina"
-},
-
-{
-numero:"CIR-01",
-estado:"libre",
-paciente:"",
-doctor:"",
-area:"Cirugía"
-}
-
+{ numero:"OBS-01", estado:"ocupada", paciente:"Camila Rojas", doctor:"Dra. Herrera", area:"Obstetricia" },
+{ numero:"OBS-02", estado:"libre", paciente:"", doctor:"", area:"Obstetricia" },
+{ numero:"PED-01", estado:"ocupada", paciente:"Tomás Silva", doctor:"Dr. Morales", area:"Pediatría" },
+{ numero:"PED-02", estado:"reservada", paciente:"Martina Díaz", doctor:"Dra. Soto", area:"Pediatría" },
+{ numero:"UTI-01", estado:"ocupada", paciente:"Luis Vega", doctor:"Dr. Campos", area:"UTI" },
+{ numero:"MED-01", estado:"ocupada", paciente:"Andrea Torres", doctor:"Dra. Riquelme", area:"Medicina" },
+{ numero:"CIR-01", estado:"libre", paciente:"", doctor:"", area:"Cirugía" }
 ];
 
 function login(){
-
 const u = document.getElementById("user").value;
 const p = document.getElementById("pass").value;
 
-if(
-(u==="admin" && p==="admin123") ||
-(u==="doctor" && p==="doctor123") ||
-(u==="enfermera" && p==="enfer123")
-){
+if(u==="admin" && p==="admin123"){
+usuarioRol = "admin";
+} else if(u==="doctor" && p==="doctor123"){
+usuarioRol = "doctor";
+} else if(u==="enfermera" && p==="enfer123"){
+usuarioRol = "enfermera";
+} else {
+alert("Usuario o contraseña incorrecta");
+return;
+}
 
 document.getElementById("login").style.display="none";
 
-}else{
-
-alert("Usuario o contraseña incorrecta");
-
+// Ocultar botón de agregar camas si es enfermera
+if(usuarioRol === "enfermera") {
+document.getElementById("btn-agregar-cama").style.display = "none";
+} else {
+document.getElementById("btn-agregar-cama").style.display = "block";
 }
 
+cambiarVista('camas'); 
 }
 
-function render(){
-
+function cambiarVista(vista) {
 const contenedor = document.getElementById("contenedor");
+const titulo = document.getElementById("titulo-pagina");
 
+if(vista === 'camas') {
+titulo.innerText = "Gestión de Camas";
+renderCamas();
+} 
+else if(vista === 'pacientes') {
+titulo.innerText = "Listado de Pacientes";
+let html = `
+<table class="vista-tabla">
+<thead><tr><th>Paciente</th><th>Cama</th><th>Área</th></tr></thead>
+<tbody>
+`;
+camas.forEach(c => {
+if(c.paciente) {
+html += `<tr><td>${c.paciente}</td><td>${c.numero}</td><td>${c.area}</td></tr>`;
+}
+});
+html += `</tbody></table>`;
+contenedor.innerHTML = html;
+} 
+else if(vista === 'urgencias') {
+titulo.innerText = "Urgencias Activas";
+contenedor.innerHTML = `
+<table class="vista-tabla">
+<thead><tr><th>Gravedad</th><th>Motivo</th><th>Tiempo de Espera</th></tr></thead>
+<tbody>
+<tr><td><span style="color:red; font-weight:bold;">Alta</span></td><td>Trauma severo</td><td>5 min</td></tr>
+<tr><td><span style="color:orange; font-weight:bold;">Media</span></td><td>Fiebre alta pediátrica</td><td>20 min</td></tr>
+<tr><td><span style="color:green; font-weight:bold;">Baja</span></td><td>Consulta general</td><td>45 min</td></tr>
+</tbody>
+</table>`;
+} 
+else if(vista === 'doctores') {
+titulo.innerText = "Contactos de Doctores";
+contenedor.innerHTML = `
+<table class="vista-tabla">
+<thead><tr><th>Doctor/a</th><th>Especialidad / Área</th><th>Anexo/Contacto</th></tr></thead>
+<tbody>
+<tr><td>Dra. Herrera</td><td>Obstetricia</td><td>#4011</td></tr>
+<tr><td>Dr. Morales</td><td>Pediatría</td><td>#4022</td></tr>
+<tr><td>Dra. Soto</td><td>Pediatría</td><td>#4023</td></tr>
+<tr><td>Dr. Campos</td><td>UTI</td><td>#4050</td></tr>
+<tr><td>Dra. Riquelme</td><td>Medicina</td><td>#4088</td></tr>
+</tbody>
+</table>`;
+}
+}
+
+function renderCamas(){
+const contenedor = document.getElementById("contenedor");
 contenedor.innerHTML = "";
 
 areas.forEach(area=>{
-
 const camasArea = camas.filter(c=>c.area===area);
 
 let html = `
 <div class="area">
-
-<div class="area-title">
-<i class="ti ti-hospital"></i>
-${area}
-</div>
-
+<div class="area-title"><i class="ti ti-hospital"></i> ${area}</div>
 <div class="grid">
 `;
 
 camasArea.forEach((cama)=>{
-
 const index = camas.indexOf(cama);
+const esEnfermera = (usuarioRol === "enfermera");
+
+// Si es enfermera, deshabilitamos campos de texto
+const disabledAttr = esEnfermera ? "disabled" : "";
 
 html += `
-
 <div class="cama">
-
-<div class="estado ${cama.estado}">
-${cama.estado.toUpperCase()}
-</div>
-
+<div class="estado ${cama.estado}">${cama.estado.toUpperCase()}</div>
 <h3>${cama.numero}</h3>
 
 <p>Paciente</p>
-
-<input 
-type="text"
-id="paciente-${index}"
-value="${cama.paciente}"
-placeholder="Nombre paciente"
->
+<input type="text" id="paciente-${index}" value="${cama.paciente}" placeholder="Ninguno" ${disabledAttr}>
 
 <p>Doctor</p>
-
-<input 
-type="text"
-id="doctor-${index}"
-value="${cama.doctor}"
-placeholder="Nombre doctor"
->
+<input type="text" id="doctor-${index}" value="${cama.doctor}" placeholder="Ninguno" ${disabledAttr}>
 
 <p>Estado</p>
-
 <select id="estado-${index}">
-
-<option value="libre" ${cama.estado==="libre"?"selected":""}>
-Libre
-</option>
-
-<option value="ocupada" ${cama.estado==="ocupada"?"selected":""}>
-Ocupada
-</option>
-
-<option value="reservada" ${cama.estado==="reservada"?"selected":""}>
-Reservada
-</option>
-
-</select>
-
-<div class="btns">
-
-<button class="save" onclick="guardar(${index})">
-Guardar
-</button>
-
-<button class="delete" onclick="eliminar(${index})">
-Eliminar
-</button>
-
-</div>
-
-</div>
-
 `;
 
+// Lógica de opciones según rol
+if(esEnfermera) {
+if(cama.estado === "libre") {
+html += `<option value="libre" selected>Libre</option>`;
+} else {
+// Si está ocupada o reservada, la enfermera puede mantenerla igual o cambiarla a Libre
+html += `<option value="${cama.estado}" selected>${cama.estado.charAt(0).toUpperCase() + cama.estado.slice(1)}</option>`;
+html += `<option value="libre">Libre</option>`;
+}
+} else {
+// Administradores y Doctores ven todo el menú desplegable siempre
+html += `<option value="libre" ${cama.estado==="libre"?"selected":""}>Libre</option>`;
+html += `<option value="ocupada" ${cama.estado==="ocupada"?"selected":""}>Ocupada</option>`;
+html += `<option value="reservada" ${cama.estado==="reservada"?"selected":""}>Reservada</option>`;
+}
+
+html += `
+</select>
+<div class="btns">
+<button class="save" onclick="guardar(${index})">Guardar</button>
+${!esEnfermera ? `<button class="delete" onclick="eliminar(${index})">Eliminar</button>` : ''}
+</div>
+</div>
+`;
 });
 
 html += `</div></div>`;
-
 contenedor.innerHTML += html;
-
 });
-
 }
 
 function guardar(index){
+const nuevoEstado = document.getElementById(`estado-${index}`).value;
 
-camas[index].paciente =
-document.getElementById(`paciente-${index}`).value;
+if(usuarioRol === "enfermera") {
+// Si la enfermera la deja libre, se limpian los campos automáticamente
+if(nuevoEstado === "libre") {
+camas[index].paciente = "";
+camas[index].doctor = "";
+}
+camas[index].estado = nuevoEstado;
+} else {
+// Admin y Doctor guardan todo lo que escriban
+camas[index].paciente = document.getElementById(`paciente-${index}`).value;
+camas[index].doctor = document.getElementById(`doctor-${index}`).value;
+camas[index].estado = nuevoEstado;
+}
 
-camas[index].doctor =
-document.getElementById(`doctor-${index}`).value;
-
-camas[index].estado =
-document.getElementById(`estado-${index}`).value;
-
-alert("Datos actualizados");
-
-render();
-
+alert("Datos actualizados con éxito");
+renderCamas();
 }
 
 function eliminar(index){
-
 if(confirm("¿Eliminar cama?")){
-
 camas.splice(index,1);
-
-render();
-
+renderCamas();
 }
-
 }
 
 function agregarCama(){
-
 const numero = prompt("Número de cama");
-
 const area = prompt("Área: Obstetricia, Pediatría, UTI, Medicina o Cirugía");
 
 if(numero && area){
-
 camas.push({
-
 numero:numero,
 estado:"libre",
 paciente:"",
 doctor:"",
 area:area
-
 });
-
-render();
-
+renderCamas();
 }
-
 }
 
 function cerrarSesion(){
-
 location.reload();
-
 }
-
-render();
-
 </script>
 
 </body>
 </html>
+

@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestión de Camas</title>
+<title>Gestión de Camas Hospital de Talca</title>
 
 <style>
+
 body{
     margin:0;
     font-family:Arial;
-    background:#eef3f8;
+    background:#eef2f7;
 }
 
 .login{
-    width:320px;
-    margin:80px auto;
+    width:330px;
+    margin:70px auto;
     background:white;
     padding:25px;
     border-radius:12px;
@@ -22,38 +23,40 @@ body{
 }
 
 .login h2{
-    margin-top:0;
-    color:#0b4f8a;
+    color:#0d4d85;
 }
 
 input,select{
     width:100%;
     padding:10px;
     margin-top:10px;
-    border:1px solid #ccc;
     border-radius:8px;
+    border:1px solid #ccc;
     box-sizing:border-box;
 }
 
 button{
-    width:100%;
     padding:10px;
-    margin-top:15px;
     border:none;
     border-radius:8px;
-    background:#0b4f8a;
+    background:#0d4d85;
     color:white;
     cursor:pointer;
     font-weight:bold;
 }
 
 button:hover{
-    background:#08375f;
+    background:#08355c;
+}
+
+.login button{
+    width:100%;
+    margin-top:15px;
 }
 
 .info{
-    margin-top:15px;
     background:#f1f5f9;
+    margin-top:15px;
     padding:10px;
     border-radius:8px;
     font-size:14px;
@@ -64,9 +67,12 @@ button:hover{
 }
 
 .top{
-    background:#0b4f8a;
+    background:#0d4d85;
     color:white;
     padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 
 .container{
@@ -74,10 +80,10 @@ button:hover{
 }
 
 .filters button{
-    width:auto;
     margin-right:5px;
+    margin-bottom:5px;
     background:#dbeafe;
-    color:#0b4f8a;
+    color:#0d4d85;
 }
 
 .filters button:hover{
@@ -86,50 +92,56 @@ button:hover{
 
 .grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
     gap:15px;
     margin-top:20px;
 }
 
-.bed{
+.card{
     background:white;
-    border-radius:10px;
+    border-radius:12px;
     padding:15px;
-    text-align:center;
     box-shadow:0 0 10px rgba(0,0,0,0.08);
-    cursor:pointer;
+    transition:0.2s;
 }
 
-.bed:hover{
-    transform:scale(1.03);
+.card:hover{
+    transform:scale(1.02);
 }
 
 .libre{
-    border-top:6px solid #22c55e;
+    border-left:8px solid #22c55e;
 }
 
 .ocupada{
-    border-top:6px solid #ef4444;
+    border-left:8px solid #ef4444;
 }
 
 .reservada{
-    border-top:6px solid #f59e0b;
+    border-left:8px solid #f59e0b;
 }
 
 .limpieza{
-    border-top:6px solid #3b82f6;
+    border-left:8px solid #3b82f6;
+}
+
+.numero{
+    font-size:20px;
+    font-weight:bold;
+    color:#0d4d85;
 }
 
 .estado{
-    margin-top:10px;
+    margin-top:8px;
     font-weight:bold;
 }
 
-.paciente{
+.dato{
     margin-top:5px;
-    font-size:13px;
-    color:#666;
+    color:#444;
+    font-size:14px;
 }
+
 </style>
 </head>
 
@@ -137,12 +149,12 @@ button:hover{
 
 <div class="login" id="login">
 
-<h2>Hospital de Talca</h2>
+<h2>Hospital Regional de Talca</h2>
 
 <input type="text" id="user" placeholder="Usuario">
 <input type="password" id="pass" placeholder="Contraseña">
 
-<select id="role">
+<select>
 <option>Médico</option>
 <option>Enfermero</option>
 <option>Administrador</option>
@@ -165,8 +177,9 @@ enfermera / 1234
 <div class="app" id="app">
 
 <div class="top">
-<h2>Gestión de Camas - Hospital de Talca</h2>
-<button onclick="logout()" style="width:auto;background:white;color:#0b4f8a;">
+<h2>Gestión de Camas</h2>
+
+<button onclick="logout()" style="background:white;color:#0d4d85;">
 Cerrar sesión
 </button>
 </div>
@@ -194,38 +207,68 @@ const users = {
     enfermera:"1234"
 };
 
+const pacientes = [
+"Camila Rojas",
+"Diego Muñoz",
+"Fernanda Silva",
+"Luis Torres",
+"Javiera Soto",
+"Matías Pérez",
+"Valentina Díaz",
+"Sebastián Herrera",
+"Martina Fuentes",
+"Benjamín Castro",
+"Antonia Vega",
+"Tomás Morales"
+];
+
+const areas = [
+"Obstetricia",
+"Medicina",
+"Pediatría",
+"Traumatología",
+"Cirugía",
+"UTI",
+"Neurología"
+];
+
+const estados = [
+"libre",
+"ocupada",
+"reservada",
+"limpieza"
+];
+
 let filter = "all";
 
 const beds = [];
 
-const estados = ["libre","ocupada","reservada","limpieza"];
-
-for(let i=1;i<=24;i++){
+for(let i=1;i<=30;i++){
 
     let estado = estados[Math.floor(Math.random()*estados.length)];
 
     beds.push({
-        id:i,
         numero:"CAMA-"+i,
         estado:estado,
-        paciente:"Paciente "+i
+        paciente:pacientes[Math.floor(Math.random()*pacientes.length)],
+        area:areas[Math.floor(Math.random()*areas.length)]
     });
 }
 
 function login(){
 
-    const u = document.getElementById("user").value;
-    const p = document.getElementById("pass").value;
+    let u = document.getElementById("user").value;
+    let p = document.getElementById("pass").value;
 
     if(users[u] && users[u] === p){
 
-        document.getElementById("login").style.display="none";
-        document.getElementById("app").style.display="block";
+        document.getElementById("login").style.display = "none";
+        document.getElementById("app").style.display = "block";
 
         renderBeds();
 
     }else{
-        document.getElementById("error").innerText="Usuario o contraseña incorrectos";
+        document.getElementById("error").innerText = "Datos incorrectos";
     }
 }
 
@@ -240,7 +283,7 @@ function setFilter(f){
 
 function renderBeds(){
 
-    const cont = document.getElementById("beds");
+    let cont = document.getElementById("beds");
 
     cont.innerHTML = "";
 
@@ -248,22 +291,34 @@ function renderBeds(){
     .filter(b => filter === "all" ? true : b.estado === filter)
     .forEach(b => {
 
-        const div = document.createElement("div");
+        let div = document.createElement("div");
 
-        div.className = "bed " + b.estado;
+        div.className = "card " + b.estado;
 
         div.innerHTML = `
-            <h3>${b.numero}</h3>
-            <div class="estado">${b.estado.toUpperCase()}</div>
-            <div class="paciente">
-                ${b.estado === "ocupada" ? b.paciente : ""}
-            </div>
+        
+        <div class="numero">${b.numero}</div>
+
+        <div class="estado">
+        Estado: ${b.estado.toUpperCase()}
+        </div>
+
+        <div class="dato">
+        Área: ${b.area}
+        </div>
+
+        <div class="dato">
+        Paciente: ${b.estado === "ocupada" ? b.paciente : "Sin paciente"}
+        </div>
+
         `;
 
         div.onclick = () => {
 
             if(b.estado === "libre"){
                 b.estado = "ocupada";
+            }else if(b.estado === "ocupada"){
+                b.estado = "limpieza";
             }else{
                 b.estado = "libre";
             }
@@ -274,9 +329,11 @@ function renderBeds(){
         cont.appendChild(div);
 
     });
+
 }
 
 </script>
 
 </body>
 </html>
+
